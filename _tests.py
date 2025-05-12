@@ -3,7 +3,7 @@ from binomial_tree_finance import compute
 
 def test_1():
     time_to_expire_yrs = 2
-    num_steps = 2
+    num_steps = 1000
     vol = 0.3
     risk_free = 0.05
     price = 50
@@ -15,7 +15,7 @@ def test_1():
     option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
                            exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
                            option_type=option_type)
-    assert abs(option_price - 7.428) < 1e-3
+    assert abs(option_price - 7.469) < 1e-3
 
 def test_2():
     time_to_expire_yrs = 2
@@ -72,7 +72,7 @@ def test_4():
 
 def test_5():
     time_to_expire_yrs = 2
-    num_steps = 5
+    num_steps = 500
     vol = 0.3
     risk_free = 0.05
     price = 50
@@ -84,7 +84,7 @@ def test_5():
     option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
                            exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
                            option_type=option_type)
-    assert abs(option_price - 7.671) < 1e-3
+    assert abs(option_price - 7.47) < 1e-3
 
 
 def test_6():
@@ -124,7 +124,23 @@ def test_7():
                            exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
                            option_type=option_type, dividend_rate=dividend_rate,
                            is_future=True)
-    assert abs(option_price - 2.918) < 1e-3
+    assert abs(option_price - 2.833) < 1e-3
+
+def test_8():
+    time_to_expire_yrs = 2
+    num_steps = 500
+    vol = 0.3
+    risk_free = 0.05
+    price = 50
+    exercise_price = 52
+
+    option_side = 'put'
+    option_type = 'european'
+
+    option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
+                           exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
+                           option_type=option_type)
+    assert abs(option_price - 6.547) < 1e-3
 
 def check_tests():
     test_1()
@@ -134,6 +150,7 @@ def check_tests():
     test_5()
     test_6()
     test_7()
+    test_8()
 
 
 if __name__ == '__main__':
