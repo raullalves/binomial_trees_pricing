@@ -65,17 +65,16 @@ def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_
             perc_up=None, perc_down=None):
     """
 
-    :param price:
-    :param vol:
-    :param num_steps:
-    :param time_to_expire:
-    :param exercise_price:
-    :param option_side:
-    :param risk_free:
-    :param option_type:
-    :param use_vol:
-    :param perc_up:
-    :param perc_down:
+    :param price: The current price of the asset
+    :param vol: The (optional) vol of the asset, at year basis
+    :param num_steps: The number of steps to generate the tree
+    :param time_to_expire: The time to the option expires, in years
+    :param exercise_price: The option exercise price
+    :param option_side: The option side (put or call)
+    :param risk_free: The risk-free rate
+    :param option_type: The option type (european or american)
+    :param perc_up: The optional perc of the asset goes up (in case of not acquired via vol)
+    :param perc_down: The optional perc of the asset goes down (in case of not acquired via vol)
     :return:
     """
 
