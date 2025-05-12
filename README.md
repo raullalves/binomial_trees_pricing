@@ -1,7 +1,9 @@
 # binomial_trees_pricing
-Computing option price (put or call) of (european or american) options, using a Binomial Tree
+Computing option price (put or call) of (european or american) options, using the Binomial Tree approach
 
-Uses a Post order DFS to create nodes and a BFS to compute... To be improved !
+The deprecated file binomial_tree_finance_bfs implements using Post order DFS to create nodes and a BFS to compute... However, it's too slow !
+
+The current implementation uses numpy arrays to support larger number of steps more efficiently
 
 See _tests.py for examples
 

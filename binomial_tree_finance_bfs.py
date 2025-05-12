@@ -88,20 +88,12 @@ def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_
         price_factor_pos = perc_up + 1
         price_factor_neg = 1-perc_down
 
-
-    price_arr = np.ones(shape=(num_steps+1, num_steps+1))
-    for j in range(1, price_arr.shape[1]):
-        price_arr[:][j] = price_factor_neg**j
-    powers_pos = np.arange(num_steps+1)
-    powers_pos = abs(powers_pos - powers_pos[:, None])
-    price_arr = np.multiply(price_arr, price_factor_pos**powers_pos)
-    price_arr *= price
+    root = traverse_populate(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire,
+                             exercise_price=exercise_price, option_side=option_side,
+                             price_factor_neg=price_factor_neg, price_factor_pos=price_factor_pos)
 
     discount = np.exp((-risk_free+dividend_rate) * dt) if not is_future else 1
     p = (1/discount - price_factor_neg) / (price_factor_pos - price_factor_neg)
-
-
-
     compute_price(root, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
                   option_side=option_side)
 
