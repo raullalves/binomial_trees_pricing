@@ -30,6 +30,13 @@ if __name__ == '__main__':
     f = Node(price=50, option_price=2, parent=d)
     g = Node(price=27.44, option_price=2, parent=d)
     h = Node(price=27.44, option_price=2, parent=g)
+    i = Node(price=27.44, option_price=2, parent=h)
+    j = Node(price=27.44, option_price=2, parent=i)
+    k = Node(price=27.44, option_price=2, parent=root)
+    l = Node(price=27.44, option_price=2, parent=d)
+    m = Node(price=27.44, option_price=2, parent=h)
+    n = Node(price=27.44, option_price=2, parent=m)
+    o = Node(price=27.44, option_price=2, parent=n)
 
     print(root.children)
 

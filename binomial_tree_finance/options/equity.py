@@ -1,15 +1,14 @@
+from binomial_tree_finance.utils.tree import Node
 from binomial_tree_finance.options.base import Base
 
 class Equity(Base):
-    def __init__(self, option_type, price, vol, rate, time_to_expire, exercise_price, number_of_steps):
-        super().__init__(number_of_steps=number_of_steps)
+    def __init__(self, option_type, vol, rate, time_to_expire, **kwargs):
+        super().__init__(**kwargs)
 
         self.option_type = option_type
-        self.price = price
         self.vol = vol
         self.rate = rate
         self.time_to_expire = time_to_expire
-        self.exercise_price = exercise_price
 
 
 class EquityPut(Equity):
