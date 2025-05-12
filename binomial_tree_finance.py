@@ -75,6 +75,7 @@ def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_
     :param option_type: The option type (european or american)
     :param perc_up: The optional perc of the asset goes up (in case of not acquired via vol)
     :param perc_down: The optional perc of the asset goes down (in case of not acquired via vol)
+    :param dividend_rate: In case the asset has dividends... This is its dividend rate
     :return:
     """
 
