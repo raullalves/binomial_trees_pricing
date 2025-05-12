@@ -16,6 +16,7 @@ Uses a Post order DFS to create nodes and a BFS to compute... To be improved !
     option_type = 'american'
 
     option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
-                           exercise_price=exercise_price, option_side=option_side)
+                           exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
+                           option_type=option_type)
     print(option_price)
 ```

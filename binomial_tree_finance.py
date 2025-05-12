@@ -23,13 +23,11 @@ def _update_option_price(nodes, exercise_price, option_side):
                                                                    exercise_price=exercise_price,
                                                                    option_side=option_side)
 
-def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, option_side):
+def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, option_side, price_factor_neg,
+                      price_factor_pos):
     root = Node(price=price)
     curr_level = [root]
     curr_step = 0
-    dt = time_to_expire/num_steps
-    price_factor_neg = np.exp(-vol*np.sqrt(dt))
-    price_factor_pos = 1/price_factor_neg
     while curr_level:
         next_level = []
         for node in curr_level:
@@ -63,11 +61,35 @@ def compute_price(root, p, discount, option_type, exercise_price, option_side):
             else:
                 root.option_price = max(opt_pricing_eq, option_result)
 
-def compute(price, vol, num_steps, time_to_expire, exercise_price, option_side):
-    root = traverse_populate(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire, exercise_price=exercise_price, option_side=option_side)
+def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_free, option_type, vol=None,
+            perc_up=None, perc_down=None):
+    """
+
+    :param price: The current price of the asset
+    :param vol: The (optional) vol of the asset, at year basis
+    :param num_steps: The number of steps to generate the tree
+    :param time_to_expire: The time to the option expires, in years
+    :param exercise_price: The option exercise price
+    :param option_side: The option side (put or call)
+    :param risk_free: The risk-free rate
+    :param option_type: The option type (european or american)
+    :param perc_up: The optional perc of the asset goes up (in case of not acquired via vol)
+    :param perc_down: The optional perc of the asset goes down (in case of not acquired via vol)
+    :return:
+    """
+
     dt = time_to_expire/num_steps
-    price_factor_neg = np.exp(-vol*np.sqrt(dt))
-    price_factor_pos = 1/price_factor_neg
+    if vol is not None:
+        price_factor_neg = np.exp(-vol*np.sqrt(dt))
+        price_factor_pos = 1/price_factor_neg
+    else:
+        price_factor_pos = perc_up + 1
+        price_factor_neg = 1-perc_down
+
+    root = traverse_populate(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire,
+                             exercise_price=exercise_price, option_side=option_side,
+                             price_factor_neg=price_factor_neg, price_factor_pos=price_factor_pos)
+
     discount = np.exp(-risk_free * dt)
     p = (1/discount - price_factor_neg) / (price_factor_pos - price_factor_neg)
     compute_price(root, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
@@ -87,5 +109,6 @@ if __name__ == '__main__':
     option_type = 'american'
 
     option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
-                           exercise_price=exercise_price, option_side=option_side)
+                           exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
+                           option_type=option_type)
     print(option_price)
