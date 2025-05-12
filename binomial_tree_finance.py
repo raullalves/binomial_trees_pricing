@@ -62,7 +62,7 @@ def compute_price(root, p, discount, option_type, exercise_price, option_side):
                 root.option_price = max(opt_pricing_eq, option_result)
 
 def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_free, option_type, vol=None,
-            perc_up=None, perc_down=None):
+            perc_up=None, perc_down=None, dividend_rate=0):
     """
 
     :param price: The current price of the asset
@@ -90,7 +90,7 @@ def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_
                              exercise_price=exercise_price, option_side=option_side,
                              price_factor_neg=price_factor_neg, price_factor_pos=price_factor_pos)
 
-    discount = np.exp(-risk_free * dt)
+    discount = np.exp((-risk_free+dividend_rate) * dt)
     p = (1/discount - price_factor_neg) / (price_factor_pos - price_factor_neg)
     compute_price(root, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
                   option_side=option_side)
