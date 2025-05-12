@@ -3,6 +3,8 @@ Computing option price (put or call) of (european or american) options, using a 
 
 Uses a Post order DFS to create nodes and a BFS to compute... To be improved !
 
+See _tests.py for examples
+
 ## Usage
 ```
     time_to_expire_yrs = 2

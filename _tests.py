@@ -88,6 +88,8 @@ def test_5():
 
 
 def test_6():
+    #stock index with dividends
+
     time_to_expire_yrs = 0.5
     num_steps = 2
     vol = 0.2
@@ -106,6 +108,8 @@ def test_6():
 
 
 def test_7():
+    # Future contract
+
     time_to_expire_yrs = 9/12
     num_steps = 3
     vol = 0.3
