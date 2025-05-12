@@ -19,7 +19,6 @@ def _update_option_price(nodes, exercise_price, option_type):
                                                                    exercise_price=exercise_price,
                                                                    option_type=option_type)
         print(f"Option price is {node.option_price} for price {node.price}")
-    return nodes
 
 def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, option_type):
     root = Node(price=price)
@@ -31,8 +30,8 @@ def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, opt
     while curr_level:
         next_level = []
         for node in curr_level:
-            node.left = Node(node.price*price_factor_neg)
-            node.right = Node(node.price*price_factor_pos)
+            node.right = Node(node.price*price_factor_neg)
+            node.left = Node(node.price*price_factor_pos)
             next_level.append(node.left)
             next_level.append(node.right)
 
@@ -45,5 +44,38 @@ def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, opt
             break
         curr_level = next_level
 
+    return root
+
+def compute_price(root, p, discount):
+
+    if root:
+
+        # First recur on left child
+        compute_price(root.left, p=p, discount=discount)
+
+        # the recur on right child
+        compute_price(root.right, p=p, discount=discount)
+
+        # now print the data of node
+        if root.option_price is None:
+            root.option_price = discount * (p * root.left.option_price + (1-p) * root.right.option_price)
+
+            print(f"Option price {root.option_price} for price {root.price}")
+
 if __name__ == '__main__':
-    traverse_populate(price=50, vol=0.3, num_steps=2, time_to_expire=2, exercise_price=52, option_type='put')
+    time_to_expire = 2
+    num_steps = 5
+    vol = 0.3
+    risk_free = 0.05
+    price = 50
+    exercise_price = 52
+    #traverse_populate(price=50, vol=0.3, num_steps=2, time_to_expire=2, exercise_price=52, option_type='put')
+    root = traverse_populate(price=price, vol=vol, num_steps=time_to_expire, time_to_expire=num_steps, exercise_price=exercise_price, option_type='put')
+    dt = time_to_expire/num_steps
+    price_factor_neg = np.exp(-vol*np.sqrt(dt))
+    price_factor_pos = 1/price_factor_neg
+    discount = np.exp(-risk_free * dt)
+    p = (1/discount - price_factor_neg) / (price_factor_pos - price_factor_neg)
+    compute_price(root, p=p, discount=discount)
+
+    print(root.option_price)
