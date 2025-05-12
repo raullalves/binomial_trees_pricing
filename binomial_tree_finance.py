@@ -1,65 +1,43 @@
 import numpy as np
 
 
-class Node:
-    def __init__(self, price=None, option_price=None):
-        self.price = price
-        self.option_price = option_price
-        self.left = None
-        self.right=None
-
-def compute_option_price_given_option_side(price, exercise_price, option_side):
+def compute_option_result(price, exercise_price, option_side):
     if option_side == 'put':
         return 0 if price > exercise_price else exercise_price - price
 
     if option_side == 'call':
         return 0 if price < exercise_price else price - exercise_price
 
-    raise Exception(f"option type {option_type} not implemented")
+    raise Exception("Option side not supported")
 
-def _update_option_price(nodes, exercise_price, option_side):
-    for node in nodes:
-        node.option_price = compute_option_price_given_option_side(price=node.price,
-                                                                   exercise_price=exercise_price,
-                                                                   option_side=option_side)
+def compute_price(price_arr, option_price_arr, p, discount, option_type, exercise_price,
+           option_side):
 
-def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, option_side, price_factor_neg,
-                      price_factor_pos):
-    root = Node(price=price)
-    curr_level = [root]
-    curr_step = 0
-    while curr_level:
-        next_level = []
-        for node in curr_level:
-            node.right = Node(node.price*price_factor_neg)
-            node.left = Node(node.price*price_factor_pos)
-            next_level.append(node.left)
-            next_level.append(node.right)
+    for j in range(price_arr.shape[1] - 2, -1, -1):
+        for i in range(price_arr.shape[0]-1, -1, -1):
+            if i > j:
+                continue
+            node_left_i = i
+            node_left_j = j + 1
+            node_right_i = i + 1
+            node_right_j = j + 1
 
-        curr_step += 1
-        if curr_step >= num_steps:
-            _update_option_price(nodes=[n.left for n in curr_level] + [n.right for n in curr_level], exercise_price=exercise_price, option_side=option_side)
-            break
-        curr_level = next_level
+            price = price_arr[i, j]
+            left_option_price = option_price_arr[node_left_i, node_left_j]
+            right_option_price = option_price_arr[node_right_i, node_right_j]
+            opt_pricing_eq = discount * (p * left_option_price + (1 - p) * right_option_price)
+            option_result = compute_option_result(price=price,
+                                                  exercise_price=exercise_price,
+                                                  option_side=option_side)
 
-    return root
-
-def compute_price(root, p, discount, option_type, exercise_price, option_side):
-
-    if root:
-        compute_price(root.left, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
-                      option_side=option_side)
-        compute_price(root.right, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
-                      option_side=option_side)
-        if root.option_price is None:
-            opt_pricing_eq = discount * (p * root.left.option_price + (1-p) * root.right.option_price)
-            option_result = compute_option_price_given_option_side(price=root.price,
-                                                                   exercise_price=exercise_price,
-                                                                   option_side=option_side)
             if option_type == 'european':
-                root.option_price = opt_pricing_eq
+                option_price_arr[i, j] = opt_pricing_eq
             else:
-                root.option_price = max(opt_pricing_eq, option_result)
+                option_price_arr[i, j] = max(opt_pricing_eq, option_result)
+
+    return option_price_arr[0, 0]
+
+
 
 def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_free, option_type, vol=None,
             perc_up=None, perc_down=None, dividend_rate=0, is_future=False):
@@ -88,29 +66,41 @@ def compute(price, num_steps, time_to_expire, exercise_price, option_side, risk_
         price_factor_pos = perc_up + 1
         price_factor_neg = 1-perc_down
 
-    root = traverse_populate(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire,
-                             exercise_price=exercise_price, option_side=option_side,
-                             price_factor_neg=price_factor_neg, price_factor_pos=price_factor_pos)
+
+    price_arr = np.ones(shape=(num_steps+1, num_steps+1), dtype="float32")
+    for j in range(1, price_arr.shape[1]):
+        price_arr[:][j] = price_factor_neg**j
+    powers_pos = np.arange(num_steps+1, dtype="float32")
+    powers_pos = abs(powers_pos - powers_pos[:, None])
+    price_arr = np.multiply(price_arr, price_factor_pos**powers_pos)
+    price_arr *= price
 
     discount = np.exp((-risk_free+dividend_rate) * dt) if not is_future else 1
     p = (1/discount - price_factor_neg) / (price_factor_pos - price_factor_neg)
-    compute_price(root, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
+
+    option_price_arr = np.zeros(shape=(num_steps+1, num_steps+1), dtype="float32")
+    option_price_arr[:, -1] = np.vectorize(lambda x: compute_option_result(price=x,
+                                                                           exercise_price=exercise_price,
+                                                                           option_side=option_side))(price_arr[:, -1])
+
+    opt_price = compute_price(price_arr=price_arr, option_price_arr=option_price_arr, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
                   option_side=option_side)
 
-    return root.option_price
+    return opt_price
 
 if __name__ == '__main__':
     time_to_expire_yrs = 2
     num_steps = 2
-    vol = 0.3
+    perc_up = 0.2
+    perc_down = 0.2
     risk_free = 0.05
     price = 50
     exercise_price = 52
 
     option_side = 'put'
-    option_type = 'american'
+    option_type = 'european'
 
-    option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
+    option_price = compute(price=price, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
                            exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
-                           option_type=option_type)
-    print(option_price)
+                           option_type=option_type, perc_up=perc_up, perc_down=perc_down)
+    assert abs(option_price - 4.1923) < 1e-3
