@@ -1,21 +1,4 @@
 import numpy as np
-import numba as nb
-def compute_price2(root, p, discount, option_type, exercise_price, option_side):
-
-    if root:
-        compute_price(root.left, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
-                      option_side=option_side)
-        compute_price(root.right, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
-                      option_side=option_side)
-        if root.option_price is None:
-            opt_pricing_eq = discount * (p * root.left.option_price + (1-p) * root.right.option_price)
-            option_result = compute_option_price_given_option_side(price=root.price,
-                                                                   exercise_price=exercise_price,
-                                                                   option_side=option_side)
-            if option_type == 'european':
-                root.option_price = opt_pricing_eq
-            else:
-                root.option_price = max(opt_pricing_eq, option_result)
 
 
 def compute_option_result(price, exercise_price, option_side):
@@ -27,9 +10,9 @@ def compute_option_result(price, exercise_price, option_side):
 
     raise Exception("Option side not supported")
 
-
 def compute_price(price_arr, option_price_arr, p, discount, option_type, exercise_price,
            option_side):
+
     for j in range(price_arr.shape[1] - 2, -1, -1):
         for i in range(price_arr.shape[0]-1, -1, -1):
             if i > j:
