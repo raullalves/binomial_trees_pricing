@@ -40,8 +40,6 @@ def traverse_populate(price, vol, num_steps, time_to_expire, exercise_price, opt
             next_level.append(node.left)
             next_level.append(node.right)
 
-            print(f"Left has price {node.left.price}")
-            print(f"Right has price {node.right.price}")
         curr_step += 1
         print(f"im at step {curr_step}")
         if curr_step >= num_steps:
@@ -78,7 +76,7 @@ def compute_price(root, p, discount, option_type, exercise_price, option_side):
 
 if __name__ == '__main__':
     time_to_expire = 2
-    num_steps = 5
+    num_steps = 15
     vol = 0.3
     risk_free = 0.05
     price = 50
@@ -86,13 +84,10 @@ if __name__ == '__main__':
     option_side = 'put'
     option_type = 'american'
 
-    #traverse_populate(price=50, vol=0.3, num_steps=2, time_to_expire=2, exercise_price=52, option_type='put')
     root = traverse_populate(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire, exercise_price=exercise_price, option_side=option_side)
     dt = time_to_expire/num_steps
     price_factor_neg = np.exp(-vol*np.sqrt(dt))
     price_factor_pos = 1/price_factor_neg
-    #price_factor_neg = 1-vol
-    #price_factor_pos = (1+vol)
     discount = np.exp(-risk_free * dt)
     p = (1/discount - price_factor_neg) / (price_factor_pos - price_factor_neg)
     compute_price(root, p=p, discount=discount, option_type=option_type, exercise_price=exercise_price,
