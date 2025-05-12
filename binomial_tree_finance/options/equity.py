@@ -1,4 +1,3 @@
-from binomial_tree_finance.utils.tree import Node
 from binomial_tree_finance.options.base import Base
 
 class Equity(Base):

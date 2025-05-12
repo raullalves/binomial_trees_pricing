@@ -1,43 +1,49 @@
+import numpy as np
+
+
 class Node:
-    def __init__(self, price=None, option_price=None, parent=None):
+    def __init__(self, price=None, option_price=None):
         self.price = price
         self.option_price = option_price
-        self.parent = parent
-        self.children = []
-        if parent is not None:
-            self.parent.set_child(self)
+        self.left = None
+        self.right=None
 
-    def set_child(self, child):
-        self.children.append(child)
+def traverse(rootnode):
+  thislevel = [rootnode]
+  my_level = 0
+  while thislevel:
+    nextlevel = list()
+    print(f"Level {my_level}")
+    for n in thislevel:
+      print(n.value)
+      if n.left: nextlevel.append(n.left)
+      if n.right: nextlevel.append(n.right)
 
-    def __repr__(self):
-        return f"price:{self.price}, option_price:{self.option_price}"
+    my_level += 1
+    thislevel = nextlevel
 
-    def max_depth(self):
-        if self.children is None or len(self.children) == 0:
-            return 0
+def traverse_populate(price, vol, num_steps, time_to_expire):
+    root = Node(price=price)
+    curr_level = [root]
+    curr_step = 1
+    dt = time_to_expire/num_steps
+    price_factor_neg = np.exp(-vol*np.sqrt(dt))
+    price_factor_pos = np.exp(vol*np.sqrt(dt))
+    while curr_level:
+        next_level = []
+        for node in curr_level:
+            node.left = Node(node.price*price_factor_neg)
+            node.right = Node(node.price*price_factor_pos)
+            next_level.append(node.left)
+            next_level.append(node.right)
 
-        return 1 + max([c.max_depth() for c in self.children])
+            print(f"Left has price {node.left.price}")
+            print(f"Right has price {node.right.price}")
+        curr_step += 1
+        print(f"im at step {curr_step}")
+        if curr_step > num_steps:
+            break
+        curr_level = next_level
 
 if __name__ == '__main__':
-    root = Node(price=50, option_price=7.43)
-    b = Node(price=67.49, option_price=0.93, parent=root)
-    c = Node(price=37.04, option_price=14.96, parent=root)
-
-    d = Node(price=91.11, option_price=0, parent=c)
-    e = Node(price=50, option_price=2, parent=c)
-
-    f = Node(price=50, option_price=2, parent=d)
-    g = Node(price=27.44, option_price=2, parent=d)
-    h = Node(price=27.44, option_price=2, parent=g)
-    i = Node(price=27.44, option_price=2, parent=h)
-    j = Node(price=27.44, option_price=2, parent=i)
-    k = Node(price=27.44, option_price=2, parent=root)
-    l = Node(price=27.44, option_price=2, parent=d)
-    m = Node(price=27.44, option_price=2, parent=h)
-    n = Node(price=27.44, option_price=2, parent=m)
-    o = Node(price=27.44, option_price=2, parent=n)
-
-    print(root.children)
-
-    print(root.max_depth())
+    traverse_populate(price=50, vol=0.3, num_steps=2, time_to_expire=2)

@@ -4,10 +4,5 @@ class Base:
         self.price = price
         self.exercise_price = exercise_price
 
-        self._generate_tree()
-
-    def _generate_tree(self):
-        pass
-
     def calculate(self):
         pass
