@@ -63,7 +63,7 @@ def compute_price(root, p, discount, option_type, exercise_price, option_side):
             else:
                 root.option_price = max(opt_pricing_eq, option_result)
 
-def compute(price, vol, num_steps, time_to_expire, exercise_price, option_side):
+def compute(price, vol, num_steps, time_to_expire, exercise_price, option_side, risk_free, option_type):
     root = traverse_populate(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire, exercise_price=exercise_price, option_side=option_side)
     dt = time_to_expire/num_steps
     price_factor_neg = np.exp(-vol*np.sqrt(dt))
@@ -87,5 +87,6 @@ if __name__ == '__main__':
     option_type = 'american'
 
     option_price = compute(price=price, vol=vol, num_steps=num_steps, time_to_expire=time_to_expire_yrs,
-                           exercise_price=exercise_price, option_side=option_side)
+                           exercise_price=exercise_price, option_side=option_side, risk_free=risk_free,
+                           option_type=option_type)
     print(option_price)
